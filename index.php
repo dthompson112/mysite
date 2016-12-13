@@ -30,8 +30,11 @@
 
 <?php
 ini_set('display_errors', 'On');
+error_reporting(E_ALL);
 //include 'func.php';
 
+
+//site_level does not have access to the new table permissions must be changed.
 $servername = "localhost";
 $username = "site_level"; //restricted user 
 $password = "mypass";
@@ -56,17 +59,16 @@ if(empty($_GET['id'])){
 } else if ($_GET['id'] == 'c' || $_GET['id'] == 'cpp'){
 			$q = 'SELECT proj_name FROM projects.lang as l WHERE l.lang = ."' . $_GET['id'] . '"';
 
-//change it to if a query using $_GET['id'] on project name does not return null maybe.
+//change it to if a query using $_GET['id'] on project name does not return null.
 } else {
 	///////////////display selected code or project
 	$q = 'SELECT file_data FROM projects.files as f, projects.proj As p WHERE p.proj_name = "' . $_GET['id'] . '" AND p.file_name = f.file_name';
 	if($result = $conn->query($q)){
 		$row = $result->fetch_array();	
-		echo $row[file_data];
-	
+		echo $row['file_data'];
 	}
 	mysqli_free_result($result);
-	$conn->close;
+	mysqli_close($conn);
 }
 
 /*$row = $result->fetch_array();	
@@ -116,30 +118,9 @@ $conn->close;
 			else if ($_GET['id'] == 'projects_by_name'){
 				$q = "SELECT proj_name FROM projects.proj";
 				genPage($servername, $username, $password, $dbname, $q);
-			} else if ($_GET['id'] == 'cpp' Or $_GET['id'] == 'c'){
-				
-				$conn = new mysqli($servername, $username, $password, $dbname);
-				
-				if($conn->connect_error){
-					die("Connection failed: " . $conn->connect_error);
-				}
-				
-				//if($result = $conn->query('SELECT proj_name FROM projects.lang as l WHERE l.lang = "' .$_GET['id']. '"')){
-				if($result = $conn->query('SELECT proj_name FROM projects.lang as l WHERE l.lang = "cpp"')){
-					//if($result = $conn->query("SELECT proj_name FROM projects.proj")){
-						//$row = $result->fetch_array();
-						
-					
-					While($row = $result->fetch_array()){
-						//echo '<li>' . $row[proj_name] . '</li>';
-						//get rid of underscores and capitalize the first letter of each word.
-						$nav_item = ucwords(str_replace('_', ' ', $row[proj_name]));
-						echo '<li><a href = "index.php?id='. $row[proj_name] .'"> ' . $nav_item . '</a></li>';
-					}
-					mysqli_free_result($result);
-				}
-				
-				mysqli_close($conn);
+			} else if ($_GET['id'] == 'cpp'){
+				$q = "SELECT proj_name FROM projects.lang as l WHERE l.lang = 'cpp'";
+				genPage($servername, $username, $password, $dbname, $q);	
 			}
 			
 			?>
