@@ -1,3 +1,6 @@
+<?php
+session_start();
+?>
 
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -13,7 +16,7 @@
 		  <li class = topnav><a href="index.php" class = topnav>Home</a></li>
 		  <li class = topnav><a href="index.php?id=projects_by_name" class = topnav>Projects By Name</a></li>
 		  <li class = topnav>
-				<a href= '#?id=projects_by_language' class='dropbtn'>Projects by Language</a>
+				<a href= '?id=projects_by_language' class='dropbtn'>Projects by Language</a>
 				<div class='dropbtn-content'>
 					<a href= 'index.php?id=cpp'>c++</a>
 					<a href= 'index.php?id=c'>c</a>
@@ -29,8 +32,8 @@
 			<pre><code>
 
 <?php
-ini_set('display_errors', 'On');
-error_reporting(E_ALL);
+//ini_set('display_errors', 'On');
+//error_reporting(E_ALL);
 //include 'func.php';
 
 
@@ -40,58 +43,52 @@ $username = "site_level"; //restricted user
 $password = "mypass";
 $dbname = "projects";
 $q;
+$q = 'SELECT file_data FROM projects.files as f, projects.proj As p WHERE p.proj_name = "' . $_GET['id'] . '" AND p.file_name = f.file_name';
 //Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
-
-
 
 //check connection
 if($conn->connect_error){
 	die("Connection failed: " . $conn->connect_error);
 }
 
+function genPage($result){
+	$row = $result->fetch_array();	
+	echo $row['file_data'];
+}
 
 if(empty($_GET['id'])){
 	///if the id is empty display the home page
+	//add home page to projects for with proj name home for ease of use
 	echo "<h1>Welcome to my site</h1>";
-	
-	//}
-} else if ($_GET['id'] == 'c' || $_GET['id'] == 'cpp'){
-			$q = 'SELECT proj_name FROM projects.lang as l WHERE l.lang = ."' . $_GET['id'] . '"';
-
-//change it to if a query using $_GET['id'] on project name does not return null.
-} else {
-	///////////////display selected code or project
-	$q = 'SELECT file_data FROM projects.files as f, projects.proj As p WHERE p.proj_name = "' . $_GET['id'] . '" AND p.file_name = f.file_name';
+	$_SESSION['state'] = 'home';
+}else if(mysqli_num_rows($result = $conn->query($q)) > 0){
+	genPage($result);
+	$_SESSION['state'] = $_GET['id'];
+} else if(isset($_SESSION['state'])){
+	$q = 'SELECT file_data FROM projects.files as f, projects.proj As p WHERE p.proj_name = "' . $_SESSION['state'] . '" AND p.file_name = f.file_name';
 	if($result = $conn->query($q)){
-		$row = $result->fetch_array();	
-		echo $row['file_data'];
+		genPage($result);
 	}
-	mysqli_free_result($result);
-	mysqli_close($conn);
+	$q = 'SELECT file_data FROM projects.files as f, projects.proj As p WHERE p.proj_name = "' . $_GET['id'] . '" AND p.file_name = f.file_name';
 }
 
-/*$row = $result->fetch_array();	
-		echo $row[file_data];
-		mysqli_free_result($result);
-$conn->close;
-*/
+mysqli_free_result($result);
+mysqli_close($conn);
 
 ?>
 
 			</code></pre>
 			</div>
 		</div>
-	
-	
-	
-	
+		
 	  <div id="navbar"></div>
 		<div id="innavbar">
 			
 			<?php
 			
-			function genPage($servername, $username, $password, $dbname, $q){
+			//Generates the navigation list based on SQL query
+			function genNav($servername, $username, $password, $dbname, $q){
 				$conn = new mysqli($servername, $username, $password, $dbname);
 				
 				if($conn->connect_error){
@@ -100,28 +97,33 @@ $conn->close;
 				
 				if($result = $conn->query($q)){
 					While($row = $result->fetch_array()){
-						//get rid of underscores and capitalize the first letter of each word.
 						$nav_item = ucwords(str_replace('_', ' ', $row['proj_name']));
 						echo '<li><a href = "index.php?id=' . $row['proj_name'] . '"> ' . $nav_item . '</a></li>';
-						//echo "<li><a href = 'index.php? id=\"$row[proj_name]\"'>$nav_item</a></li>"
-						//echo "<li>$row[proj_name]</li>";
 					}
 					mysqli_free_result($result);
 				}
 				mysqli_close($conn);
 			}
-				
-			if(is_null($_GET['id'])){
+			
+			//generate navigaton window based on user selection
+			switch ($_GET['id']) {
+			case "projects_by_name":
 				$q = "SELECT proj_name FROM projects.proj";
-				genPage($servername, $username, $password, $dbname, $q);
-			}	
-			else if ($_GET['id'] == 'projects_by_name'){
-				$q = "SELECT proj_name FROM projects.proj";
-				genPage($servername, $username, $password, $dbname, $q);
-			} else if ($_GET['id'] == 'cpp'){
+				genNav($servername, $username, $password, $dbname, $q);
+				break;
+			case "cpp":
 				$q = "SELECT proj_name FROM projects.lang as l WHERE l.lang = 'cpp'";
-				genPage($servername, $username, $password, $dbname, $q);	
+				genNav($servername, $username, $password, $dbname, $q);
+				break;
+			case "c":
+				$q = "SELECT proj_name FROM projects.lang as l WHERE l.lang = 'c'";
+				genNav($servername, $username, $password, $dbname, $q);
+				break;	
+			default:
+				$q = "SELECT proj_name FROM projects.proj";
+				genNav($servername, $username, $password, $dbname, $q);
 			}
+			
 			
 			?>
 		</div>
