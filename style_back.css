@@ -1,8 +1,7 @@
 body, html {
 	font-family: Arial;
-    /*background-color: #37474F;*/
-     background-image: url("seamless_board.jpg");
-	/*background-color: white;*/
+    background-color: #37474F;
+
   }
   
 pre {
@@ -10,7 +9,7 @@ pre {
 }
 
 a {
-	color: white;
+	color: black;
 	text-decoration: none;
 }
 
@@ -26,7 +25,6 @@ a:hover{
   float: right;
   overflow: hidden;
   width: 80%;
-  
   }
   
   /*#navbar{
@@ -48,13 +46,11 @@ a:hover{
   
   #innavbar{
   border-radius: 5px;
-  /*background-color: white;*/
-  background-color: #37474F;
+  background-color: white;
   padding-left: 10px;
   padding-right: 10px;
   list-style-type: none;
   overflow: hidden;
-  opacity: 0.6;
   /*float: left;*/
   }
   
@@ -70,7 +66,6 @@ a:hover{
 	/*background-color: white;*/
 	background-color: #37474F;
 	font-size: 32px;
-	opacity: 0.6;
 	
   }
   
@@ -93,8 +88,6 @@ a:hover{
   
   .dropbtn-content a {
 	display: list-item;
-	color: black;
-	opacity: 0.6;
   }
   
   ul {

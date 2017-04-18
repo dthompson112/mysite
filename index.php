@@ -3,7 +3,7 @@ session_start();
 ?>
 
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 <html>
 
   <head>
@@ -16,7 +16,7 @@ session_start();
 		  <li class = topnav><a href="index.php" class = topnav>Home</a></li>
 		  <li class = topnav><a href="index.php?id=projects_by_name" class = topnav>Projects By Name</a></li>
 		  <li class = topnav>
-				<a href= '?id=projects_by_language' class='dropbtn'>Projects by Language</a>
+				<a href= '?id=projects_by_language' class= dropbtn>Projects by Language</a>
 				<div class='dropbtn-content'>
 					<a href= 'index.php?id=cpp'>c++</a>
 					<a href= 'index.php?id=c'>c</a>
@@ -34,10 +34,8 @@ session_start();
 <?php
 //ini_set('display_errors', 'On');
 //error_reporting(E_ALL);
-//include 'func.php';
+include 'func.php';
 
-
-//site_level does not have access to the new table permissions must be changed.
 $servername = "localhost";
 $username = "site_level"; //restricted user 
 $password = "mypass";
@@ -52,14 +50,9 @@ if($conn->connect_error){
 	die("Connection failed: " . $conn->connect_error);
 }
 
-function genPage($result){
-	$row = $result->fetch_array();	
-	echo $row['file_data'];
-}
 
 if(empty($_GET['id'])){
 	///if the id is empty display the home page
-	//add home page to projects for with proj name home for ease of use
 	echo "<h1>Welcome to my site</h1>";
 	$_SESSION['state'] = 'home';
 }else if(mysqli_num_rows($result = $conn->query($q)) > 0){
@@ -82,45 +75,29 @@ mysqli_close($conn);
 			</div>
 		</div>
 		
-	  <div id="navbar"></div>
-		<div id="innavbar">
+	  <div id="navbar">	
+		  <div id="innavbar">
 			
 			<?php
 			
-			//Generates the navigation list based on SQL query
-			function genNav($servername, $username, $password, $dbname, $q){
-				$conn = new mysqli($servername, $username, $password, $dbname);
-				
-				if($conn->connect_error){
-					die("Connection failed: " . $conn->connect_error);
-				}
-				
-				if($result = $conn->query($q)){
-					While($row = $result->fetch_array()){
-						$nav_item = ucwords(str_replace('_', ' ', $row['proj_name']));
-						echo '<li><a href = "index.php?id=' . $row['proj_name'] . '"> ' . $nav_item . '</a></li>';
-					}
-					mysqli_free_result($result);
-				}
-				mysqli_close($conn);
-			}
 			
 			//generate navigaton window based on user selection
 			switch ($_GET['id']) {
 			case "projects_by_name":
-				$q = "SELECT proj_name FROM projects.proj";
+				$q = "SELECT DISTINCT proj_name FROM projects.proj ORDER BY proj_name ASC";
 				genNav($servername, $username, $password, $dbname, $q);
 				break;
 			case "cpp":
-				$q = "SELECT proj_name FROM projects.lang as l WHERE l.lang = 'cpp'";
+				$q = "SELECT DISTINCT proj_name FROM projects.lang as l WHERE l.lang = 'cpp' ORDER BY proj_name ASC";
 				genNav($servername, $username, $password, $dbname, $q);
 				break;
 			case "c":
-				$q = "SELECT proj_name FROM projects.lang as l WHERE l.lang = 'c'";
+				$q = "SELECT DISTINCT proj_name FROM projects.lang as l WHERE l.lang = 'c' ORDER BY proj_name ASC";
 				genNav($servername, $username, $password, $dbname, $q);
 				break;	
 			default:
-				$q = "SELECT proj_name FROM projects.proj";
+				//$q = "SELECT DISTINCT proj_name FROM projects.proj";
+				$q = "SELECT DISTINCT proj_name FROM projects.proj ORDER BY proj_name ASC";
 				genNav($servername, $username, $password, $dbname, $q);
 			}
 			
