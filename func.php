@@ -25,7 +25,10 @@ function genNav($servername, $username, $password, $dbname, $q){
 
 //Generates description and media based on sql query
 function genDescription($result){
+	echo "<h3>For full descriptions, screen shots or video, and code select and individual project from the left navigation bar</h3>";
 	while($row = $result->fetch_array()){
+		//$title = ucwords(str_replace('_', ' ', $row['proj_name']));
+		//echo "<h3>" . $title . "</h3>";
 		echo $row['description'];
 		echo "<br></br>";
 	}
@@ -66,7 +69,10 @@ function genDescriptions($stmt){
 	$stmt->bind_result($r);
 	while($stmt->fetch()){
 		echo $r;
+		echo "<br></br>";
+		echo "<br></br>";
 	}
+	
 }
 
 ?>

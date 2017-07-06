@@ -1,4 +1,5 @@
 <?php
+//There is a bug in projects by language, fix it.
 session_start();
 ?>
 
@@ -8,6 +9,7 @@ session_start();
 
   <head>
     <link rel="stylesheet" type"text/css" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <h1 class="title">Dan Thompson's Projects and Code</h1>
   </head>
   
@@ -30,7 +32,7 @@ session_start();
 	  <div id="container">
 		<div id="content">
 			<div id="incontent">
-			<pre><code>
+				<pre><code>
 
 <?php
 //ini_set('display_errors', 'On');
@@ -58,6 +60,17 @@ $stmtd = $conn->prepare("SELECT description FROM projects.proj as p WHERE p.proj
 $stmtd->bind_param("s",$d);
 $d = $_GET['id'];
 
+//generate descriptions of all projects
+$stmtmultd = $conn->prepare("SELECT description FROM projects.proj");
+
+//generate descriptions of cpp projects
+$stmtcpp = $conn->prepare("SELECT description FROM projects.proj as p,");
+
+//generate descriptions by language
+$stmtdlang = $conn->prepare("SELECT DISTINCT description FROM projects.proj as p, projects.files as f WHERE p.proj_name = f.proj_name and f.lang = ?");
+$stmtdlang->bind_param("s",$l);
+$l = $_GET['id'];
+
 //check connection
 if($conn->connect_error){
 	die("Connection failed: " . $conn->connect_error);
@@ -71,46 +84,41 @@ if(empty($_GET['id'])){
 	echo "<p>Of course, this website is really its own project.  Rather than using Word Press or a similar content management system I built the back end of the site using the lamp stack (Linux, Apache2, MySQL, PHP) and the front end of the site with HTML5 and CSS.  I built the database, wrote the SQL queries, used PHP to generate the page content, created all the CSS rules, and wrote all of the HTML tags.</p>";
 	echo "<p>I built the site from scratch because the coding is the fun part.  I hope you enjoy it.</p>";
 	$_SESSION['state'] = 'home';
-}else if($stmtd->execute()){
+	
+}else if($_GET['id'] == 'projects_by_name'){ //generate a description of all projects by name alphabetically
+	
+	if($stmtmultd->execute()){
+		echo '<h2>To see a project\'s code use the side navigation window</h2>';
+		echo '<br></br>';
+		genDescriptions($stmtmultd);
+	}
+
+}else{ //generate a description of the language selected
+	$stmtdlang->execute();
+	genDescriptions($stmtdlang);
+}
+
+ if($stmtd->execute()){
 	
 	genDescriptions($stmtd);
 	
 	if($stmtf->execute()){
 		genPages($stmtf);
 	}
-	
-	$_SESSION['state'] = $_GET['id'];
-} else if(isset($_SESSION['state'])){
 
-	$id = $_SESSION['state'];
-	$d = $_SESSION['state'];
-	
-
-	if($stmtd->execute())
-	{
-		genDescriptions($stmtd);
-	}
-
-
-	if($stmtf->execute()){
-		genPages($stmtf);
-	}
-	
-	$id = $_SESSION['state'];
-	$d = $_SESSION['state'];
 }
 
 
 $stmtf->close();
 $stmtd->close();
 $conn->close();
+$stmtmultd->close();
 
 ?>
 
-			</code></pre>
+				</code></pre>
 			</div>
 		</div>
-		
 	  <div id="navbar">	
 		  <div id="innavbar">
 			
@@ -158,9 +166,13 @@ $conn->close();
 			?>
 		</div>
 	  </div>
-	  
-	  
+	</div> 
   </body>
+  
+  
+  
+
+  
 </html>
 
 
